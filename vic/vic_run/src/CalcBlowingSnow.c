@@ -121,6 +121,8 @@ CalcBlowingSnow(double   Dt,
 
     if (snowdepth > 0.0) {
         if (options.BLOWING_SPATIAL_WIND && sigma_w != 0.) {
+//************************************TODO***************************** add open mp
+          #pragma omp parallel for private(p)
             for (p = 0; p < param.BLOWING_NUMINCS; p++) {
                 SubFlux = lower = upper = 0.0;
                 /* Find the limits of integration. */
@@ -292,6 +294,11 @@ qromb(double (*funcd)(),
     int                      j;
 
     h[1] = 1.0;
+    #pragma omp parallel for private(j)
+    for (j = 1; j <= param.BLOWING_MAX_ITER; j++) {
+      h[j] = 1.0 / (double)pow(4, j-1);
+    }
+    #pragma omp parallel for private(j)
     for (j = 1; j <= param.BLOWING_MAX_ITER; j++) {
         s[j] = trapzd(funcd, es, Wind, AirDens, ZO, EactAir, F, hsalt, phi_r,
                       ushear, Zrh, a, b, j);
@@ -302,7 +309,9 @@ qromb(double (*funcd)(),
                 return ss;
             }
         }
-        h[j + 1] = 0.25 * h[j];
+        //h[j] should be = 1/4^(j-1)
+        //h[j+1] = 1.0/pow(4, j);
+        //h[j + 1] = 0.25 * h[j];
     }
     log_err("Too many steps");
 }
