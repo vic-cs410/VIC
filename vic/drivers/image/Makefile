@@ -49,7 +49,7 @@ endif
 $(info $$NC_CFLAGS is [${NC_CFLAGS}])
 
 ifndef MPICC
-MPICC = mpicc
+MPICC = mpiicc
 endif
 $(info $$MPICC is [${MPICC}])
 
@@ -78,7 +78,9 @@ CFLAGS  =  ${INCLUDES} ${NC_CFLAGS}  -ggdb -O0 -Wall -Wextra -std=c99 \
 					 -DLOG_LVL=$(LOG_LVL) \
 					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
 					 -DUSERNAME=\"$(USER)\" \
-					 -DHOSTNAME=\"$(HOSTNAME)\"
+					 -DHOSTNAME=\"$(HOSTNAME)\" \
+					 -fopenmp
+
 
 ifeq (true, ${TRAVIS})
 # Add extra debugging for builds on travis
