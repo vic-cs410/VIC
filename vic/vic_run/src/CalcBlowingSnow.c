@@ -298,21 +298,28 @@ qromb(double (*funcd)(),
     for (j = 1; j <= param.BLOWING_MAX_ITER; j++) {
       h[j] = 1.0 / (double)pow(4, j-1);
     }
+    double result;
+    bool shouldContinue = true;
     #pragma omp parallel for private(j)
     for (j = 1; j <= param.BLOWING_MAX_ITER; j++) {
-        s[j] = trapzd(funcd, es, Wind, AirDens, ZO, EactAir, F, hsalt, phi_r,
-                      ushear, Zrh, a, b, j);
-        if (j >= param.BLOWING_K) {
-            polint(&h[j - param.BLOWING_K], &s[j - param.BLOWING_K],
-                   param.BLOWING_K, 0.0, &ss, &dss);
-            if (fabs(dss) <= DBL_EPSILON * fabs(ss)) {
-                return ss;
+	if (shouldContinue) {
+            s[j] = trapzd(funcd, es, Wind, AirDens, ZO, EactAir, F, hsalt, phi_r,
+                          ushear, Zrh, a, b, j);
+            if (j >= param.BLOWING_K) {
+                polint(&h[j - param.BLOWING_K], &s[j - param.BLOWING_K],
+                       param.BLOWING_K, 0.0, &ss, &dss);
+                if (fabs(dss) <= DBL_EPSILON * fabs(ss)) {
+		    result = ss;
+		    shouldContinue = false;
+                }
             }
-        }
+	}
         //h[j] should be = 1/4^(j-1)
         //h[j+1] = 1.0/pow(4, j);
         //h[j + 1] = 0.25 * h[j];
     }
+    return result;
+    
     log_err("Too many steps");
 }
 
