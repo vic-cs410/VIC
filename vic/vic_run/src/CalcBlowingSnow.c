@@ -294,11 +294,9 @@ qromb(double (*funcd)(),
     int                      j;
 
     h[1] = 1.0;
-    #pragma omp parallel for private(j)
     for (j = 1; j <= param.BLOWING_MAX_ITER; j++) {
       h[j] = 1.0 / (double)pow(4, j-1);
     }
-    #pragma omp parallel for private(j)
     for (j = 1; j <= param.BLOWING_MAX_ITER; j++) {
         s[j] = trapzd(funcd, es, Wind, AirDens, ZO, EactAir, F, hsalt, phi_r,
                       ushear, Zrh, a, b, j);
